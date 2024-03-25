@@ -1,0 +1,180 @@
+HTML :
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        #image-upload {
+            margin-bottom: 20px;
+        }
+        #image-preview {
+            max-width: 100%;
+            margin-bottom: 20px;
+        }
+        #analysis-results {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Image Analysis</h1>
+    </header>
+    <div class="container">
+        <input type="file" id="image-upload" accept="image/*">
+        <div>
+            <label for="image-description">Image Description:</label><br>
+            <textarea id="image-description" rows="4" cols="50"></textarea>
+        </div>
+        <div id="image-preview"></div>
+        <div id="analysis-results">
+            <h2>Analysis Results:</h2>
+            <p id="result-text"></p>
+        </div>
+    </div>
+
+    <script>
+        documentgetElementById('image-upload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const imgElement = document.createElement('img');
+                imgElement.src = event.target.result;
+                document.getElementById('image-preview').innerHTML = '';
+                document.getElementById('image-preview').appendChild(imgElement);
+                analyzeImage(imgElement);
+            }
+
+            reader.readAsDataURL(file);
+        });
+
+        function analyzeImage(imgElement) {
+            // Placeholder function for image analysis
+            // Here you can integrate any image analysis API or write your own image processing code
+            // For simplicity, let's just pretend it analyzes and provides some results
+            const analysisResult = 'This is a placeholder result for the image analysis.';
+            const description = document.getElementById('image-description').value;
+            document.getElementById('result-text').textContent = analysisResult + "\n\nDescription: " + description;
+            document.getElementById('analysis-results').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
+
+JAVASCRIPT:
+window.onload = function() {
+  const fileInput = document.getElementById('fileInput'),
+        canvas = document.getElementById('imageCanvas'),
+        ctx = canvas.getContext('2d'),
+        imageDescription = document.getElementById('imageDescription');
+
+  fileInput.addEventListener('change', function(e) {
+    const { files: [file] } = e.target,
+          reader = new FileReader();
+    
+    reader.onload = function(e) {
+      const { result: src } = e.target,
+            img = new Image();
+
+      img.onload = function() {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data,
+              [totalRed, totalGreen, totalBlue] = Array.from({ length: imageData.length / 4 }, (i) => i * 4)
+                .reduce((acc, i) => [acc[0] + imageData[i], acc[1] + imageData[i + 1], acc[2] + imageData[i + 2]], [0, 0, 0]),
+              [averageRed, averageGreen, averageBlue] = [totalRed, totalGreen, totalBlue].map((total, index) => Math.round(total / (index === 0 ? imageData.length / 4 : 1)));
+
+        imageDescription.innerHTML = `Average color: RGB(${averageRed}, ${averageGreen}, ${averageBlue})`;
+      }
+      img.src = src;
+    }
+    reader.readAsDataURL(file);
+  });
+};
+
+
+Using Azure Cognitive services with computer vision :
+!pip install azure-storage-blob
+from azure.storage.blob import BlobServiceClient
+
+cog_key = 'YOUR_COG_KEY'
+cog_endpoint = 'YOUR_COG_ENDPOINT'
+
+print('Ready to use cognitive services at {} using key {}'.format(cog_endpoint, cog_key))
+
+
+# Install required packages
+!pip install azure-storage-blob
+!pip install azure-cognitiveservices-vision-computervision
+!pip install matplotlib
+!pip install pillow
+
+# Import required packages
+from azure.cognitiveservices.vision.computervision import ComputerVisionClient
+from msrest.authentication import CognitiveServicesCredentials
+import matplotlib.pyplot as plt
+from PIL import Image
+import io
+
+# Define your Cognitive Services credentials
+cog_endpoint = "https://readercomputervision.cognitiveservices.azure.com/"
+cog_key = "38d8ef43644b4b5482d6d4f459662547"
+
+# Define the image path
+image_path = "/content/IMG_TEST_1.jpg"  # Modify this according to your image path
+
+# Create a ComputerVisionClient object
+computervision_client = ComputerVisionClient(cog_endpoint, CognitiveServicesCredentials(cog_key))
+description = computervision_client.describe_image_in_stream(image_stream)
+
+# Open the image file
+with open(image_path, "rb") as image_stream:
+
+    # Display the image and caption
+    image = Image.open(io.BytesIO(image_stream.read()))
+    plt.imshow(image,description)
+    plt.axis('off')
+    plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
